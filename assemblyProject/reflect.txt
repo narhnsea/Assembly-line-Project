@@ -1,0 +1,99 @@
+*****************************************************************************/
+1) Topics and concepts learned:
+	a) Modular and incremental software development:
+		I learned and appreciated that it is best to break-up a task in to smaller modules, and then develop
+		each module successively. Development from ms1 and incrementally through ms3 demonstrated this concept
+		because it would have been a much tougher task attempting to develop all the modules at once. Breaking a task down into smaller,
+		 more manageable modules is a key principle of modular and incremental software development. This approach involves developing 
+		software in stages, with each stage building on the previous one. In the case of the development of the modules in the project
+		 you mentioned, starting with ms1 and incrementally developing through ms3, this approach allowed the development team to focus 
+		on one module at a time, ensuring that each module was well-designed, thoroughly tested, and functioning correctly before moving 
+		on to the next one. This approach can help to reduce the risk of errors and bugs, as each module is tested and refined before the 
+		next one is added. In addition, breaking a project down into smaller modules can also make it easier to manage and maintain over
+		 time. If a	change is needed in one module, it can be made without affecting the other modules. This can help to improve the overall
+		 quality and reliability of the software, as well as making it easier to update and adapt to changing requirements. Overall, modular
+		 and incremental software development is an effective approach to building complex software systems. By breaking a task down into 
+		smaller modules and developing them successively, developers can create software that is easier to manage, test, and maintain, while
+		 also reducing the risk of errors and bugs.
+
+	b) Further OOP concepts regarding abstraction:
+		This referes to the following non-member functions declared in Lines 52 to 55 of Workstation.h:
+
+			bool checkPrevOrders(Workstation* pStation, const std::size_t& idx); //line 52
+			std::ptrdiff_t findIndex(const CustomerOrder& order); //line 53
+			void updateGlobalCopy(const CustomerOrder& order); //line 54
+			void sortCustomerOrderContainer(std::deque<CustomerOrder>& cont);//line 55
+
+		Apart from their primary purposes, these functions also served to ensure that a Workstation object isn't really 
+		"aware" of the LineManager object where it is being used. These non-member functions serve to abstract the implementation details of the 	Workstation class from the LineManager class. By declaring these functions outside of the Workstation class and passing a pointer to a Workstation 	object as a parameter, the LineManager object can interact with the Workstation object without needing to know anything about its internal 	implementation. This is an example of the principle of abstraction in object-oriented programming (OOP). Abstraction refers to the ability to hide the 	complexity of a system by exposing only the necessary details to the outside world. In this case, the details of the Workstation class are hidden from 	the LineManager class, which only needs to interact with it through the public interface provided by the non-member functions.
+	Abstraction is an important concept in OOP because it allows programmers to design systems that are easier to understand, maintain, and modify. By 	hiding the implementation details of a class, changes can be made to the underlying code without affecting the code that uses it. This can lead to 	more robust and flexible systems that are better suited to changing requirements over time.
+
+	c) More advanced use (including nesting) of STL algorithms:
+		It was in this project that I really learned how to nest (Lines 146 to 166 of LineManager.cpp) STL algorthims as 
+		well as establish links between two elements (within a container) by utilizing another container (Lines 127 to 
+		144 of LineManager.cpp). I also learned more about sorting using a binary predicate (Lines 223 to 231 of Workstation.cpp).
+code samples
+  if(m_activeLine.empty()){ //.............line 146
+        return;
+    }// end if_3
+
+    iter = m_activeLine.begin(); // iter is of type std::vector<Workstation*>::iterator
+    iterEnd = m_activeLine.end(); // iterEnd is of type std::vector<Workstation*>::iterator
+	auto iter2 = std::find_if(m_activeLine.begin(), m_activeLine.end(), //iter2 is of type std::vector<Workstation*>::iterator
+         [ &iter, &iterEnd ] (Workstation* elem){//
+             std::string t = elem->getItemName(
+			 bool b_exist = false;
+                	std::for_each(iter, iterEnd,
+                    [ &t, &b_exist ] (Workstation* elem2){
+                        Workstation* temp = elem2->getNextStation();
+                        if(temp != nullptr){
+                            b_exist = b_exist || (temp->getItemName() == t );
+                        }// end if
+                    } );// end for_each algorithm
+
+                return !b_exist;
+         		 } );// end find_if algorithm............line 166
+
+auto iter = m_activeLine.begin(); // iter is of type std::vector<Workstation*>::iterator ...line 127
+    auto iterEnd = m_activeLine.end(); // iterEnd is of type std::vector<Workstation*>::iterator
+	std::for_each(m_activeLine.begin(), m_activeLine.end(),
+          [ &t_map, &iter, &iterEnd ] (Workstation* elem){
+                std::string t = elem->getItemName();
+                auto iter2 = t_map.find(t); // NB- iter is of type: std::map<std::string, std::string>::iterator
+                t = iter2->second;
+
+                if( t != std::string("") ){
+                    auto iter3 = std::find_if(iter, iterEnd, //iter3 is of type std::vector<Workstation*>::iterator
+                        [ &t ] (Workstation* elem){
+                            return (elem->getItemName() == t);
+                        } );// end fjnd_if algorithm
+                    elem->setNextStation( *iter3 );
+                }else{
+                    elem->setNextStation( nullptr);
+                }// end if_else
+          } );// end for line ......144
+In this code, a find_if algorithm is nested within a for_each algorithm. The find_if algorithm searches for the first element in a vector that meets a specified condition. The condition in this case checks whether an element's next station (if it exists) has the same item name as any other element in the active line. The for_each algorithm then iterates over all elements in the vector, applying the same condition to each one. By nesting these algorithms, the code can efficiently and effectively search for elements that meet a complex condition, without requiring multiple loops or complicated control structures.
+
+		
+   		 void sortCustomerOrderContainer(std::deque<CustomerOrder>& cont) .....line 223
+		{
+    			if( (cont.empty()) || (cont.size() == 1) ) return;
+
+    				std::sort(cont.begin(), cont.end(),
+        		[ ](CustomerOrder& elem1, CustomerOrder& elem2){
+          		 return ( findIndex(elem1) < findIndex(elem2) );
+         	}); // end sort algorithm
+	}// end sortCustomerOrderContainer()t ....line 231
+The sort algorithm from the STL is used to sort the std::deque container cont in ascending order, based on the indices returned by the findIndex function. The binary predicate used in this case is a lambda function that takes two CustomerOrder objects as arguments and returns a boolean value indicating whether the first element should precede the second element in the sorted container. The findIndex function is called for each element in the container, and the index returned by this function is used to compare the two elements in the lambda function. If the index of the first element is less than the index of the second element, then the lambda function returns true, indicating that the first element should precede the second element in the sorted container.
+
+
+2) The main challenges I encountered while developing this project are:
+	a) Developing the code for method- void LineManager::reorderStations() [Line 170 of LineManager.cpp],:
+		Initially, I had attempted implementing the functionality of this method utilizing nested lambdas. However,
+		I observed that once a container has been captured in a lambda, it becomes a "const" object and can no longer 
+		be modified wiplement. Firstly, while it was easy to determine when an order
+		has been completed (by calling the: bool CustomerOrder::isOrderFilled() const method), it is not so apparent when an
+		order can be termed incomplete when it's not certain its items have been filled as much as possible. This was the bone of
+		contention throughout while developing this project. However, with many debug messages placed within various
+		methods, I figured out that an order would be termed incomplete if it's not completed and can no longer be passed to another
+		workstation down the line.
